@@ -51,12 +51,12 @@ namespace MusicBeePlugin
                     var art = m.Groups["artist"].Value.Trim();
                     var title = m.Groups["title"].Value.Trim();
 
-                    if ((art.Contains(HttpUtility.UrlDecode(artist, Encoding))) && (title.Contains(HttpUtility.UrlDecode(titele, Encoding))))//すべての検索結果からアーティストと曲名両方が一致したIDを入れる
+                    if ((art == (HttpUtility.UrlDecode(artist, Encoding))) && (title == (HttpUtility.UrlDecode(titele, Encoding))))//すべての検索結果からアーティストと曲名両方が一致したIDを入れる
                     {
                         lyricId = m.Groups["lyricId"].Value.Trim();
-                        break;//曲名とアーティストが両方部分一致したら終了
+                        break;//曲名とアーティストが両方一致したら終了
                     }
-                    else if (title.Contains(HttpUtility.UrlDecode(titele, Encoding)))//一致したのがなければ曲名に一致した最後のIDを入れる。
+                    else if (title == (HttpUtility.UrlDecode(titele, Encoding)))//一致したのがなければ曲名に一致した最後のIDを入れる。
                     {
                         lyricId = m.Groups["lyricId"].Value.Trim();
 
