@@ -27,7 +27,7 @@ namespace MusicBeePlugin
             lyricPage = lyricPage.Replace("<br>", "\n");//HTMLの改行コードをC#の改行コードに置き換え。
             var lyric_startIndex = lyricPage.IndexOf("align=left class=\"noprint\"");//正規表現ですべてから探すのはアレなので範囲指定
             var lyric_length = lyricPage.Substring(lyric_startIndex).IndexOf("下記タグを貼り付けてもリンクできます。");//同上
-            var lyric_ms = Regex.Match(lyricPage.Substring(lyric_startIndex, lyric_length), @"unselectable=""on;""\>(?<lyric>.*)\</p", RegexOptions.Singleline);//指定範囲から歌詞を摘出
+            var lyric_ms = Regex.Match(lyricPage.Substring(lyric_startIndex, lyric_length), @"unselectable=""on;""\>(?<lyric>.*)\</div\>\n</div\>", RegexOptions.Singleline);//指定範囲から歌詞を摘出
             var lines = lyric_ms.Groups["lyric"].Value.Trim();//歌詞をトリム。
             return lines;//歌詞を返す。
         }
