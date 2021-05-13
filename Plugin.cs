@@ -15,12 +15,12 @@ namespace MusicBeePlugin
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
             about.PluginInfoVersion = PluginInfoVersion;
-            about.Name = $"{Provider}歌詞取得 (2019/02/24)";
+            about.Name = $"{Provider}歌詞取得 (2021/5/13)";
             about.Description = $"{Provider}から歌詞を取得します。";
             about.Author = "htsign(noriokun4649 Edit)";
             about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
             about.Type = PluginType.LyricsRetrieval;
-            about.VersionMajor = 2;  // your plugin version
+            about.VersionMajor = 3;  // your plugin version
             about.VersionMinor = 0;
             about.Revision = 1;
             about.MinInterfaceVersion = MinInterfaceVersion;
