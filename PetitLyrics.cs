@@ -15,7 +15,7 @@ namespace MusicBeePlugin
         {
             var client = new WebClientEx() { Encoding = Encoding };
             string lyricId;
-            lyricId = GetId(client, HttpUtility.UrlEncode(trackTitle, Encoding), HttpUtility.UrlEncode(artist, Encoding) ?? "","");
+            lyricId = GetId(client, HttpUtility.UrlEncode(trackTitle, Encoding), HttpUtility.UrlEncode(artist, Encoding) ?? "", "");
             //歌詞ナビではinfoにいろいろな情報が入る。アルバム情報やアニメ主題歌、ドラマ主題歌などの情報等
             //歌詞ナビ側のアルバム情報がまちまちなのでアルバムでの検索は""にして無効化中。設定から切り替え出来るように検討ちゅ　↑
             var id = lyricId;
@@ -32,7 +32,6 @@ namespace MusicBeePlugin
             return lines;//歌詞を返す。
         }
 
-
         private static string GetId(WebClientEx client, string titele, string artist, string album)
         {
             var mode = album != "" ? "info" : "kyoku";//アルバム情報があれば優先的にアルバム情報での検索にする。
@@ -42,16 +41,17 @@ namespace MusicBeePlugin
             //曲名から歌詞ナビにある情報をすべて取得。　m=bubunで部分一致になる。
             if (!searchPage.Contains("該当データがありませんでした。"))
             {
-                var startIndex = searchPage.IndexOf("<td bgcolor=\"#EE9900\" style=\"width:60px\"></td>");//正規表現ですべてから探すのはアレなので範囲指定
-                var length = searchPage.Substring(startIndex).IndexOf("<tr><td colspan=5 bgcolor=\"#FFDD55\" align=center><font color=\"#aa6600\">");//同上
-                //正規表現　歌詞ページのIDと曲名とアーティストの情報を正規表現から取得。
-                var ms = Regex.Matches(searchPage.Substring(startIndex, length), @"href=""song_view.html\?(?<lyricId>\d+)""\>(?<title>\w+).+kashu=.+&start=1""\>(?<artist>\w+)");//指定範囲から検索結果を摘出
+                var startTex = "<td bgcolor=\"#EE9900\"><font color=\"#ffffff\">- - - ◆　ミニ情報</font></td>";
+                var startIndex = searchPage.IndexOf(startTex) + startTex.Length + 1;//正規表現ですべてから探すのはアレなので範囲指定
+                var length = searchPage.Substring(startIndex).IndexOf("<tr><td colspan=5 bgcolor=\"#FFDD55\" align=center>") - 2;//同上
+                                                                                                                                 //正規表現　歌詞ページのIDと曲名とアーティストの情報を正規表現から取得。
+                var ms = Regex.Matches(searchPage.Substring(startIndex, length), @"<a href=""/song_view\.html\?(?<lyricId>\d+)""><img src=.+<a href=""/song_view.html\?\d+"">(?<title>.+)</a>.+&start=1"">(?<artist>.+)</a>");//指定範囲から検索結果を摘出
                 foreach (Match m in ms)//すべての検索結果
                 {
                     var art = m.Groups["artist"].Value.Trim();
                     var title = m.Groups["title"].Value.Trim();
 
-                    if ((art == (HttpUtility.UrlDecode(artist, Encoding))) && (title == (HttpUtility.UrlDecode(titele, Encoding))))//すべての検索結果からアーティストと曲名両方が一致したIDを入れる
+                    if ((art == HttpUtility.UrlDecode(artist, Encoding)) && (title == HttpUtility.UrlDecode(titele, Encoding)))//すべての検索結果からアーティストと曲名両方が一致したIDを入れる
                     {
                         lyricId = m.Groups["lyricId"].Value.Trim();
                         break;//曲名とアーティストが両方一致したら終了
@@ -65,6 +65,5 @@ namespace MusicBeePlugin
             }
             return lyricId;
         }
-
     }
 }
