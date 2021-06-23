@@ -25,9 +25,7 @@ namespace MusicBeePlugin
             }
             var lyricPage = client.DownloadString($"https://kashinavi.com/song_view.html?{id}");
             lyricPage = lyricPage.Replace("<br>", "\n");//HTMLの改行コードをC#の改行コードに置き換え。
-            var lyric_startIndex = lyricPage.IndexOf("align=left class=\"noprint\"");//正規表現ですべてから探すのはアレなので範囲指定
-            var lyric_length = lyricPage.Substring(lyric_startIndex).IndexOf("下記タグを貼り付けてもリンクできます。");//同上
-            var lyric_ms = Regex.Match(lyricPage.Substring(lyric_startIndex, lyric_length), @"unselectable=""on;""\>(?<lyric>.*)\</div\>\n</div\>", RegexOptions.Singleline);//指定範囲から歌詞を摘出
+            var lyric_ms = Regex.Match(lyricPage, @"\<div class=""kashi"" oncopy=""return false;"" unselectable=""on;""\>(?<lyric>.*)\</div\>\n\</div\>", RegexOptions.Singleline);//指定範囲から歌詞を摘出
             var lines = lyric_ms.Groups["lyric"].Value.Trim();//歌詞をトリム。
             return lines;//歌詞を返す。
         }
@@ -45,7 +43,7 @@ namespace MusicBeePlugin
                 var startIndex = searchPage.IndexOf(startTex) + startTex.Length + 1;//正規表現ですべてから探すのはアレなので範囲指定
                 var length = searchPage.Substring(startIndex).IndexOf("<tr><td colspan=5 bgcolor=\"#FFDD55\" align=center>") - 2;//同上
                                                                                                                                  //正規表現　歌詞ページのIDと曲名とアーティストの情報を正規表現から取得。
-                var ms = Regex.Matches(searchPage.Substring(startIndex, length), @"<a href=""/song_view\.html\?(?<lyricId>\d+)""><img src=.+<a href=""/song_view.html\?\d+"">(?<title>.+)</a>.+&start=1"">(?<artist>.+)</a>");//指定範囲から検索結果を摘出
+                var ms = Regex.Matches(searchPage.Substring(startIndex, length), @"<a href=""/song_view\.html\?(?<lyricId>\d+)""><img style=.+<a href=""/song_view.html\?\d+"">(?<title>.+)</a>.+&start=1"">(?<artist>.+)</a>");//指定範囲から検索結果を摘出
                 foreach (Match m in ms)//すべての検索結果
                 {
                     var art = m.Groups["artist"].Value.Trim();
