@@ -20,7 +20,7 @@ namespace MusicBeePlugin
             about.Author = "htsign(noriokun4649 Edit)";
             about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
             about.Type = PluginType.LyricsRetrieval;
-            about.VersionMajor = 3;  // your plugin version
+            about.VersionMajor = 4;  // your plugin version
             about.VersionMinor = 0;
             about.Revision = 1;
             about.MinInterfaceVersion = MinInterfaceVersion;
