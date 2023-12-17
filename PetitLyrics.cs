@@ -24,7 +24,7 @@ namespace MusicBeePlugin
                 return null;//MusicBeeのプラグイン仕様通りにnullを返す。
             }
             var lyricPage = client.DownloadString($"https://kashinavi.com/song_view.html?{id}");
-            lyricPage = lyricPage.Replace("<br>", "\n");//HTMLの改行コードをC#の改行コードに置き換え。
+            lyricPage = lyricPage.Replace("<br>", "\n").Replace("<p>", "\n").Replace("</p>", "\n");//HTMLの改行コードをC#の改行コードに置き換え。
             var lyric_ms = Regex.Match(lyricPage, @"\<div class=""kashi"" oncopy=""return false;"" unselectable=""on;""\>(?<lyric>.*)\</div\>\n\</div\>", RegexOptions.Singleline);//指定範囲から歌詞を摘出
             var lines = lyric_ms.Groups["lyric"].Value.Trim();//歌詞をトリム。
             return lines;//歌詞を返す。
@@ -35,19 +35,25 @@ namespace MusicBeePlugin
             var mode = album != "" ? "info" : "kyoku";//アルバム情報があれば優先的にアルバム情報での検索にする。
             var search = album != "" ? album : titele;//アルバム情報での検索時に検索ワードをMusicBee側のアルバム情報にする。
             var lyricId = "";
-            var searchPage = client.DownloadString($"https://kashinavi.com/search.php?r={mode}&search={search}&m=bubun&start=1");
+            var requestUrl = $"https://kashinavi.com/search.php?r={mode}&search={search}&m=bubun&start=1";
+            var searchPage = client.DownloadString(requestUrl);
             //曲名から歌詞ナビにある情報をすべて取得。　m=bubunで部分一致になる。
             if (!searchPage.Contains("該当データがありませんでした。"))
             {
                 var startTex = "<td bgcolor=\"#EE9900\"><font color=\"#ffffff\">- - - ◆　ミニ情報</font></td>";
                 var startIndex = searchPage.IndexOf(startTex) + startTex.Length + 1;//正規表現ですべてから探すのはアレなので範囲指定
                 var length = searchPage.Substring(startIndex).IndexOf("<tr><td colspan=5 bgcolor=\"#FFDD55\" align=center>") - 2;//同上
-                                                                                                                                 //正規表現　歌詞ページのIDと曲名とアーティストの情報を正規表現から取得。
-                var ms = Regex.Matches(searchPage.Substring(startIndex, length), @"<a href=""/song_view\.html\?(?<lyricId>\d+)""><img style=.+<a href=""/song_view.html\?\d+"">(?<title>.+)</a>.+&start=1"">(?<artist>.+)</a>");//指定範囲から検索結果を摘出
+
+                var trimtext = searchPage.Substring(startIndex, length);
+                var pattern = @"<a href=""/song_view\.html\?(?<lyricId>\d+)"">(?<Song>[^<]+)</a><\/td><td style=\""width:200px\""><a href=""/artist\.html\?.+"">(?<Artist>[^<]+)</a>";
+
+                //正規表現　歌詞ページのIDと曲名とアーティストの情報を正規表現から取得。
+                var ms = Regex.Matches(trimtext, pattern);//指定範囲から検索結果を摘出
+
                 foreach (Match m in ms)//すべての検索結果
                 {
-                    var art = m.Groups["artist"].Value.Trim();
-                    var title = m.Groups["title"].Value.Trim();
+                    var art = m.Groups["Artist"].Value.Trim();
+                    var title = m.Groups["Song"].Value.Trim();
 
                     if ((art == HttpUtility.UrlDecode(artist, Encoding)) && (title == HttpUtility.UrlDecode(titele, Encoding)))//すべての検索結果からアーティストと曲名両方が一致したIDを入れる
                     {
